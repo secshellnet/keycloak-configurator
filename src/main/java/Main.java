@@ -3,9 +3,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.Base64;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
@@ -28,22 +28,36 @@ public class Main {
     document.select("http-listener").attr("proxy-address-forwarding", "true");
 
     if (args.length > 1) {
-      final Elements dataSource = document.select("datasource[pool-name=\"KeycloakDS\"]");
 
-      dataSource.select("connection-url").html(MessageFormat.format("jdbc:postgresql://{0}/{1}", args[1], args[2]));
-      dataSource.select("driver").html("postgresql");
+      final Element dataSource = document.select("datasource[pool-name=\"KeycloakDS\"]").first();
+      dataSource.attr("use-ccm", "true");
+
+      dataSource.select("connection-url").first()
+          .text(MessageFormat.format("jdbc:postgresql://{0}/{1}", args[1], args[2]));
+      dataSource.select("driver").first().text("postgresql");
+
+      final Element pool = new Element("pool");
+      pool.appendChild(new Element("flush-strategy").text("IdleConnections"));
+      dataSource.appendChild(pool);
+
+      final Element validation = new Element("validation");
+      validation.appendChild(new Element("check-valid-connection-sql").text("SELECT 1"));
+      validation.appendChild(new Element("background-validation").text("true"));
+      validation.appendChild(new Element("background-validation-millis").text("60000"));
+      dataSource.appendChild(validation);
 
       final Elements security = dataSource.select("security");
-      security.select("user-name").html(args[3]);
-      security.select("password").html(args[4]);
+      security.select("user-name").first().text(args[3]);
+      security.select("password").first().text(args[4]);
 
-      document.select("drivers").html(
-          document.select("drivers").html()
-          +
-          "<driver name=\"postgresql\" module=\"org.postgresql\">\n"
-          + "<xa-datasource-class>org.postgresql.xa.PGXADataSource</xa-datasource-class>\n"
-          + "</driver>"
-      );
+      final Element drivers = document.select("drivers").first();
+
+      final Element driver = new Element("driver");
+      driver.attr("name", "postgresql");
+      driver.attr("module", "org.postgresql.jdbc");
+      driver.appendChild(new Element("xa-datasource-class").text("org.postgresql.xa.PGXADataSource"));
+
+      drivers.appendChild(driver);
 
 //    document.select("default-bindings").attr("datasource", "java:jboss/datasources/KeycloakDS");
     }
