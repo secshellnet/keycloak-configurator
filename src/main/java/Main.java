@@ -50,6 +50,6 @@ public class Main {
 
     Files.copy(Path.of(args[0]), Path.of(args[0] + ".back." + System.currentTimeMillis()));
     Files.writeString(Path.of(args[0]), document.html());
-    System.out.println(new String(Base64.getDecoder().decode("TmljbyBpc3QgZG9vZiA6KQ==")));
+    System.out.println("Success");
   }
 }
