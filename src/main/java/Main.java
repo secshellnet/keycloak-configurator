@@ -3,9 +3,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.Random;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
@@ -20,7 +18,7 @@ public class Main {
       return;
     }
 
-    if (String.join("", args).matches("[<>]")) {
+    if (String.join("", args).contains("<") || String.join("", args).contains(">")) {
       System.out.println("Illegal characters: \"<>\"");
       return;
     }
@@ -50,8 +48,8 @@ public class Main {
 //    document.select("default-bindings").attr("datasource", "java:jboss/datasources/KeycloakDS");
     }
 
-    Files.copy(Path.of(args[0]), Path.of(args[0] + ".back." + new Random().nextInt(1000000000)));
+    Files.copy(Path.of(args[0]), Path.of(args[0] + ".back." + System.currentTimeMillis()));
     Files.writeString(Path.of(args[0]), document.html());
-    System.out.println(Arrays.toString(Base64.getDecoder().decode("TmljbyBpc3QgZG9vZiA6KQ==")));
+    System.out.println(new String(Base64.getDecoder().decode("TmljbyBpc3QgZG9vZiA6KQ==")));
   }
 }
