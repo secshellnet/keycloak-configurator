@@ -13,7 +13,7 @@ repositories {
 sourceCompatibility = targetCompatibility = 11
 
 dependencies {
-    implementation 'org.jsoup:jsoup:1.14.2'
+    implementation 'org.jsoup:jsoup:1.14.3'
 }
 
 jar {
